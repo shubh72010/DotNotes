@@ -42,6 +42,7 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-biometric = { group = "androidx.biometric", name = "biometric", version = "1.2.0-alpha05" }
+androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version = "1.0.1" }
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version = "2.4.1" }
 
 [plugins]

@@ -1,13 +1,22 @@
 package com.folius.dotnotes.ui
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import android.net.Uri
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,6 +29,10 @@ fun SettingsScreen(
     val currentModelId by viewModel.modelId.collectAsState()
     val currentTheme by viewModel.theme.collectAsState()
     val animationsEnabledPref by viewModel.isAnimationsEnabled.collectAsState()
+    val currentStorageUri by viewModel.storageUri.collectAsState()
+    
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var apiKey by remember { mutableStateOf(currentApiKey ?: "") }
     var modelId by remember { mutableStateOf(currentModelId) }
@@ -29,6 +42,18 @@ fun SettingsScreen(
         apiKey = currentApiKey ?: ""
         modelId = currentModelId
         animationsEnabled = animationsEnabledPref
+    }
+
+    val storagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        uri?.let {
+            viewModel.setStorageUri(it.toString())
+            context.contentResolver.takePersistableUriPermission(
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+        }
     }
 
     Scaffold(
@@ -104,6 +129,54 @@ fun SettingsScreen(
                     onCheckedChange = { animationsEnabled = it }
                 )
             }
+
+            // Storage & Backup
+            Divider()
+            Text("Storage & Backup", style = MaterialTheme.typography.titleMedium)
+            
+            OutlinedButton(
+                onClick = { storagePicker.launch(null) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.FolderOpen, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(if (currentStorageUri != null) "Change Backup Directory" else "Set Backup Directory")
+            }
+            
+            if (currentStorageUri != null) {
+                Text(
+                    text = "Current: ${Uri.parse(currentStorageUri).path}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                Button(
+                    onClick = {
+                        viewModel.backupNotes(
+                            context = context,
+                            onSuccess = {
+                                Toast.makeText(context, "Backup successful!", Toast.LENGTH_SHORT).show()
+                            },
+                            onError = { error ->
+                                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+                            }
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Backup, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Backup Notes Now")
+                }
+            } else {
+                Text(
+                    text = "Set a directory to enable text backups to Downloads or other local folders.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Divider()
 
             Button(
                 onClick = {

@@ -1,0 +1,13 @@
+- Added note pinning
+- Added note sharing
+- Full open-source release
+- Custom storage path support
+- Gesture controls and menu improvements
+- Animation customization (skip/disable buttons)
+- Dark, Light, and System theme support
+- Folder renaming and removal
+- Image upload and checklists
+- Biometric Secret Notes
+- AI summaries via OpenRouter
+- Unsaved changes warning
+- Performance and stability fixes

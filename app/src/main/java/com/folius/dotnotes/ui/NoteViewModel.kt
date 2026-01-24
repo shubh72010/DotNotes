@@ -40,6 +40,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     val modelId = settingsManager.modelId.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "google/gemini-flash-1.5")
     val theme = settingsManager.themePref.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "System")
     val isAnimationsEnabled = settingsManager.isAnimationsEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+    val storageUri = settingsManager.storageUri.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
     
     val folders: StateFlow<List<com.folius.dotnotes.data.Folder>> = folderDao.getAllFolders()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -139,6 +140,29 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
 
     fun saveSettings(key: String, model: String, theme: String, animationsEnabled: Boolean) {
         viewModelScope.launch { settingsManager.saveSettings(key, model, theme, animationsEnabled) }
+    }
+
+    fun setStorageUri(uri: String?) {
+        viewModelScope.launch { settingsManager.saveStorageUri(uri) }
+    }
+
+    fun backupNotes(context: android.content.Context, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            val uri = storageUri.value
+            if (uri == null) {
+                onError("Please set a backup directory in settings first.")
+                return@launch
+            }
+
+            val allNotes = noteDao.getAllNotes().first()
+            val allFolders = folderDao.getAllFolders().first()
+
+            val success = com.folius.dotnotes.utils.BackupUtils.exportNotesToDirectory(
+                context, uri, allNotes, allFolders
+            )
+
+            if (success) onSuccess() else onError("Failed to create backup.")
+        }
     }
 
     suspend fun summarizeNote(content: String): String? {

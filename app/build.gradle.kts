@@ -15,8 +15,8 @@ android {
         applicationId = "com.folius.dotnotes"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 10
+        versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.biometric)
+    implementation(libs.androidx.documentfile)
     implementation(libs.reorderable)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)

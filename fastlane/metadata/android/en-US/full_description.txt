@@ -1,0 +1,15 @@
+DotNotes is a modern, privacy-focused, and open-source note-taking application for Android. Built with Jetpack Compose, it provides a seamless experience for capturing thoughts, managing tasks, and keeping sensitive information secure.
+
+Key Features:
+- 📂 Folder Organization: Group notes into custom folders with rename/remove support.
+- 🔒 Secret Notes: Biometrically secured private notes for sensitive data.
+- 📋 Dynamic Checklists: Create and reorder tasks with drag-and-drop.
+- 🖼️ Image Integration: Attach images for better context.
+- 🎨 Theme System: Support for Dark, Light, and System themes.
+- 🤖 AI Summaries: Generate quick summaries using OpenRouter.
+- 📌 Note Pinning & Sharing: Keep important notes at the top and share content easily.
+- 🔍 Fast Search: Real-time search across titles and content.
+- 🚀 Performance: Gesture controls and animation customization (skip/disable).
+- 🔐 Privacy First: All data is stored locally with custom storage path support.
+
+DotNotes is fully open-source and designed to be simple yet powerful.
