@@ -1,6 +1,7 @@
 package com.folius.dotnotes.ui
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -20,17 +22,26 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.graphicsLayer
 import com.folius.dotnotes.data.Folder
 import com.folius.dotnotes.data.Note
 import java.text.SimpleDateFormat
@@ -53,6 +64,9 @@ fun NoteListScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsState()
     val pinnedNotes by viewModel.pinnedNotes.collectAsState()
+    val sortOrder by viewModel.sortOrder.collectAsState()
+    val allTags by viewModel.allTags.collectAsState()
+    val selectedTag by viewModel.selectedTag.collectAsState()
     
     val pagerState = rememberPagerState(
         initialPage = when (selectedTab) {
@@ -115,6 +129,32 @@ fun NoteListScreen(
                     ) 
                 },
                 actions = {
+                    // Sort dropdown
+                    var showSortMenu by remember { mutableStateOf(false) }
+                    Box {
+                        IconButton(onClick = { showSortMenu = true }) {
+                            Icon(Icons.Default.Sort, contentDescription = "Sort")
+                        }
+                        DropdownMenu(
+                            expanded = showSortMenu,
+                            onDismissRequest = { showSortMenu = false }
+                        ) {
+                            SortOrder.entries.forEach { order ->
+                                DropdownMenuItem(
+                                    text = { 
+                                        Text(
+                                            order.label,
+                                            color = if (sortOrder == order) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        ) 
+                                    },
+                                    onClick = {
+                                        viewModel.setSortOrder(order)
+                                        showSortMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                     IconButton(onClick = onSettingsClick) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
@@ -306,6 +346,7 @@ fun NoteItem(note: Note, onClick: () -> Unit, onLongPress: () -> Unit) {
     val date = remember(note.timestamp) {
         SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(note.timestamp))
     }
+    val noteColorValue = note.color
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -317,8 +358,19 @@ fun NoteItem(note: Note, onClick: () -> Unit, onLongPress: () -> Unit) {
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
+        Row {
+            // Color indicator
+            if (noteColorValue != null) {
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
+                        .background(Color(noteColorValue.toLong() or 0xFF000000L))
+                )
+            }
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp).weight(1f)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (note.title.isNotBlank()) {
@@ -344,6 +396,25 @@ fun NoteItem(note: Note, onClick: () -> Unit, onLongPress: () -> Unit) {
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
+                if (note.isMap) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        Icons.Default.Map,
+                        contentDescription = "Map Note",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
+            // Tags
+            if (note.tags.isNotEmpty()) {
+                Text(
+                    text = note.tags.joinToString(" ") { "#$it" },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -390,6 +461,7 @@ fun NoteItem(note: Note, onClick: () -> Unit, onLongPress: () -> Unit) {
                 )
             }
         }
+        } // end Row
     }
 }
 
@@ -402,6 +474,9 @@ fun NoteListContent(
     onNoteClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val haptic = LocalHapticFeedback.current
+    val density = LocalDensity.current
+
     Column(modifier = modifier.fillMaxSize()) {
         if (isLoading) {
             LazyColumn(
@@ -436,7 +511,7 @@ fun NoteListContent(
                         confirmValueChange = { value ->
                             when (value) {
                                 SwipeToDismissBoxValue.StartToEnd -> {
-                                    viewModel.deleteNote(note)
+                                    viewModel.trashNote(note)
                                     true
                                 }
                                 SwipeToDismissBoxValue.EndToStart -> {
@@ -445,13 +520,23 @@ fun NoteListContent(
                                 }
                                 else -> false
                             }
-                        }
+                        },
+                        positionalThreshold = { distance -> distance * 0.75f }
                     )
+
+                    // Haptic Detent: Trigger feel immediately when threshold is crossed
+                    LaunchedEffect(dismissState.targetValue) {
+                        if (dismissState.targetValue != SwipeToDismissBoxValue.Settled) {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }
+                    }
 
                     SwipeToDismissBox(
                         state = dismissState,
                         backgroundContent = {
                             val direction = dismissState.dismissDirection
+                            val isDismissed = dismissState.targetValue != SwipeToDismissBoxValue.Settled
+                            
                             val color by animateColorAsState(
                                 when (dismissState.targetValue) {
                                     SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.errorContainer
@@ -478,7 +563,21 @@ fun NoteListContent(
                                 contentAlignment = alignment
                             ) {
                                 if (icon != null) {
-                                    Icon(icon, contentDescription = null)
+                                    val scale by animateFloatAsState(
+                                        targetValue = if (isDismissed) 1.3f else 1.0f
+                                    )
+                                    val alpha by animateFloatAsState(
+                                        targetValue = if (isDismissed) 1.0f else 0.5f
+                                    )
+                                    Icon(
+                                        icon, 
+                                        contentDescription = null,
+                                        modifier = Modifier.graphicsLayer {
+                                            scaleX = scale
+                                            scaleY = scale
+                                            this.alpha = alpha
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -626,6 +725,33 @@ fun SearchAndFoldersTab(
             },
             singleLine = true
         )
+
+        // Tag filter chips
+        val allTags by viewModel.allTags.collectAsState()
+        val selectedTag by viewModel.selectedTag.collectAsState()
+        if (allTags.isNotEmpty()) {
+            Text("Tags", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(bottom = 4.dp, top = 8.dp))
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                item {
+                    FilterChip(
+                        selected = selectedTag == null,
+                        onClick = { viewModel.setSelectedTag(null) },
+                        label = { Text("All") },
+                        leadingIcon = { Icon(Icons.Default.Label, contentDescription = null, modifier = Modifier.size(14.dp)) }
+                    )
+                }
+                items(allTags) { tag ->
+                    FilterChip(
+                        selected = selectedTag == tag,
+                        onClick = { viewModel.setSelectedTag(if (selectedTag == tag) null else tag) },
+                        label = { Text("#$tag") }
+                    )
+                }
+            }
+        }
         
         Text(
             text = "Active Folder Filters apply to the Notes and Lists tabs.",

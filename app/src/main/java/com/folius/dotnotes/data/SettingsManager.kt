@@ -20,7 +20,7 @@ class SettingsManager(private val context: Context) {
 
     val apiKey: Flow<String?> = context.dataStore.data.map { it[API_KEY] }
     val modelId: Flow<String> = context.dataStore.data.map { it[MODEL_ID] ?: "google/gemini-flash-1.5" }
-    val themePref: Flow<String> = context.dataStore.data.map { it[THEME_PREF] ?: "System" }
+    val themePref: Flow<String> = context.dataStore.data.map { it[THEME_PREF] ?: "Dark" }
     val isAnimationsEnabled: Flow<Boolean> = context.dataStore.data.map { it[ANIMATIONS_ENABLED] ?: true }
     val storageUri: Flow<String?> = context.dataStore.data.map { it[STORAGE_URI] }
 

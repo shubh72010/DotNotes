@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -24,7 +25,9 @@ fun DecryptedText(
     revealDirection: RevealDirection = RevealDirection.START,
     useOriginalCharsOnly: Boolean = false,
     characters: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+",
-    encryptedColor: Color = Color.Green
+    encryptedColor: Color = Color.Green,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
 ) {
     var displayText by remember { mutableStateOf(text) }
     var revealedIndices by remember { mutableStateOf(setOf<Int>()) }
@@ -88,7 +91,9 @@ fun DecryptedText(
             }
         },
         modifier = modifier,
-        style = style
+        style = style,
+        maxLines = maxLines,
+        overflow = overflow
     )
 }
 

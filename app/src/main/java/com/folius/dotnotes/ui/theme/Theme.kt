@@ -35,19 +35,43 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun DotNotesTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    theme: String = "Dark",
+    darkTheme: Boolean = androidx.compose.foundation.isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    val colorScheme = when (theme) {
+        "Material You" -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val context = LocalContext.current
+                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            } else {
+                if (darkTheme) DarkColorScheme else LightColorScheme
+            }
         }
+        "Dark" -> DarkColorScheme
+        "Light" -> LightColorScheme
+        else -> { // "System"
+            if (darkTheme) DarkColorScheme else LightColorScheme
+        }
+    }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val view = androidx.compose.ui.platform.LocalView.current
+    if (!view.isInEditMode) {
+        androidx.compose.runtime.SideEffect {
+            val window = (view.context as android.app.Activity).window
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+            window.navigationBarColor = android.graphics.Color.TRANSPARENT
+            
+            val isAppearanceLightStatusBars = when (theme) {
+                "Light" -> true
+                "Dark", "Material You" -> false
+                else -> !darkTheme
+            }
+            
+            val insetsController = androidx.core.view.WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = isAppearanceLightStatusBars
+            insetsController.isAppearanceLightNavigationBars = isAppearanceLightStatusBars
+        }
     }
 
     MaterialTheme(

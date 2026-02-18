@@ -42,7 +42,7 @@ class MainActivity : FragmentActivity() {
                 else -> androidx.compose.foundation.isSystemInDarkTheme()
             }
 
-            DotNotesTheme(darkTheme = isDarkTheme) {
+            DotNotesTheme(theme = theme, darkTheme = isDarkTheme) {
                 val navController = rememberNavController()
                 
                 NavHost(
@@ -85,7 +85,14 @@ class MainActivity : FragmentActivity() {
                         com.folius.dotnotes.ui.SettingsScreen(
                             viewModel = viewModel,
                             onBack = { navController.popBackStack() },
-                            onSecretNotesClick = { navController.navigate("secret_notes") }
+                            onSecretNotesClick = { navController.navigate("secret_notes") },
+                            onTrashClick = { navController.navigate("trash") }
+                        )
+                    }
+                    composable("trash") {
+                        com.folius.dotnotes.ui.TrashScreen(
+                            viewModel = viewModel,
+                            onBack = { navController.popBackStack() }
                         )
                     }
                     composable("secret_notes") {
@@ -107,6 +114,9 @@ class MainActivity : FragmentActivity() {
                             onImageClick = { uri -> 
                                 val encodedUri = java.net.URLEncoder.encode(uri, "UTF-8")
                                 navController.navigate("image_viewer/$encodedUri") 
+                            },
+                            onNavigateToNote = { linkedNoteId ->
+                                navController.navigate("editor/$linkedNoteId")
                             }
                         )
                     }
