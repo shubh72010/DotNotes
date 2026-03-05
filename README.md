@@ -1,3 +1,6 @@
+# honest message from the developer: i am right now focusing on JusBrowse and i'll very soon refine this notes app and push updates, thanks for starring my repo!
+
+
 # DotNotes 📝
 
 DotNotes is a modern, privacy-focused, and feature-rich note-taking application for Android. Built with Jetpack Compose and modern Android architecture, it provides a seamless experience for capturing your thoughts, managing tasks, and keeping your sensitive information secure.
