@@ -1,4 +1,4 @@
-# honest message from the developer: i am right now focusing on JusBrowse and i'll very soon refine this notes app and push updates, thanks for starring my repo! (spoiler: im so much obsessed with material you 3 expressive)
+# honest message from the developer: Alrighty, I'm now focusing on DotNotes yayay
 
 
 # DotNotes 📝
