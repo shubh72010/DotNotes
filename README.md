@@ -1,4 +1,4 @@
-# honest message from the developer: Alrighty, I'm now focusing on DotNotes yayay
+# honest message from the developer: im too lazy to delete log :P
 
 # DotNotes 📝
 
