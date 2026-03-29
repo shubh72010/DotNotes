@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,6 +45,7 @@ fun SecretNotesScreen(
     val isAuthenticated by viewModel.isSecretAuthenticated.collectAsState()
     var authTrigger by remember { mutableIntStateOf(0) }
     var showBiometricUnavailableDialog by remember { mutableStateOf(false) }
+    var isPillMenuExpanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val secretNotes by viewModel.secretNotes.collectAsState()
     val animationsEnabled by viewModel.isAnimationsEnabled.collectAsState()
@@ -127,48 +129,30 @@ fun SecretNotesScreen(
             }
         )
     }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Secret Notes") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+    Scaffold { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            if (!isAuthenticated) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.Lock, 
+                            contentDescription = null, 
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Authentication Required")
+                        Button(onClick = { 
+                            authTrigger++
+                        }, modifier = Modifier.padding(top = 16.dp)) {
+                            Text("Unlock")
+                        }
                     }
                 }
-            )
-        }
-    ) { padding ->
-        if (!isAuthenticated) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Default.Lock, 
-                        contentDescription = null, 
-                        modifier = Modifier.size(48.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Authentication Required")
-                    Button(onClick = { 
-                        authTrigger++
-                    }, modifier = Modifier.padding(top = 16.dp)) {
-                        Text("Unlock")
-                    }
-                }
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
+            } else {
                 if (secretNotes.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("No secret notes found.")
@@ -176,15 +160,72 @@ fun SecretNotesScreen(
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
+                        contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 100.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(secretNotes) { note ->
+                        items(secretNotes, key = { it.id }) { note ->
                             SecretNoteItem(note = note, animationsEnabled = animationsEnabled, onClick = { onNoteClick(note.id) })
                         }
                     }
                 }
             }
+
+            // DotPill overlay at bottom
+            com.folius.dotnotes.ui.components.DotPill(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                placeholderText = if (isAuthenticated) "Secret Notes" else "Locked",
+                isMenuExpanded = isPillMenuExpanded,
+                onMenuExpandedChange = { isPillMenuExpanded = it },
+                onSwipeRight = onBack,
+                menuContent = {
+                    val contrastColor = MaterialTheme.colorScheme.onSurface
+                    Text("Secret Actions", style = MaterialTheme.typography.titleMedium, color = contrastColor, modifier = Modifier.padding(bottom = 16.dp))
+                    
+                    androidx.compose.foundation.layout.FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        if (!isAuthenticated) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .width(80.dp)
+                                    .clip(MaterialTheme.shapes.small)
+                                    .clickable { 
+                                        isPillMenuExpanded = false
+                                        authTrigger++ 
+                                    }
+                                    .padding(8.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp)) {
+                                    Icon(Icons.Default.Lock, null, tint = contrastColor, modifier = Modifier.size(28.dp))
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text("Unlock", style = MaterialTheme.typography.labelSmall, color = contrastColor)
+                            }
+                        }
+                        
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .width(80.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .clickable { 
+                                    isPillMenuExpanded = false
+                                    onBack() 
+                                }
+                                .padding(8.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp)) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = contrastColor, modifier = Modifier.size(28.dp))
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("Back", style = MaterialTheme.typography.labelSmall, color = contrastColor)
+                        }
+                    }
+                }
+            )
         }
     }
 }

@@ -24,13 +24,7 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE title = :title AND isDeleted = 0 LIMIT 1")
     suspend fun getNoteByTitle(title: String): Note?
 
-    @Query("""
-        SELECT * FROM notes 
-        WHERE isDeleted = 0 
-        AND (title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%')
-        ORDER BY timestamp DESC
-    """)
-    fun searchNotes(query: String): Flow<List<Note>>
+
 
     @Query("SELECT * FROM notes WHERE id IN (:ids) AND isDeleted = 0")
     suspend fun getNotesByIds(ids: List<Int>): List<Note>

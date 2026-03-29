@@ -3,6 +3,7 @@ package com.folius.dotnotes.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
@@ -21,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.folius.dotnotes.data.Note
 
 @Composable
-fun PinnedNoteItem(
+fun PinnedSubpill(
     note: Note,
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
@@ -29,11 +30,11 @@ fun PinnedNoteItem(
 ) {
     val backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
     val contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val noteColor = note.color?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
 
-    Column(
+    Row(
         modifier = modifier
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(backgroundColor)
             .pointerInput(Unit) {
                 detectTapGestures(
@@ -41,45 +42,41 @@ fun PinnedNoteItem(
                     onLongPress = { onLongClick?.invoke() }
                 )
             }
-            .padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        val initial = if (note.title.isNotBlank()) {
-            note.title.first().uppercase()
-        } else if (note.content.isNotBlank()) {
-            note.content.first().uppercase()
-        } else {
-            "N"
-        }
-
+        // Color dot or Initial
         Box(
             modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer),
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(noteColor.copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center
         ) {
+            val initial = if (note.title.isNotBlank()) {
+                note.title.first().uppercase()
+            } else if (note.content.isNotBlank()) {
+                note.content.first().uppercase()
+            } else {
+                "N"
+            }
             Text(
                 text = initial,
-                style = MaterialTheme.typography.titleLarge.copy(
+                style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = noteColor
                 )
             )
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
-        
         Text(
             text = if (note.title.isNotBlank()) note.title else "Untitled",
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 10.sp,
-                lineHeight = 12.sp
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.Medium
             ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
             color = contentColor
         )
     }

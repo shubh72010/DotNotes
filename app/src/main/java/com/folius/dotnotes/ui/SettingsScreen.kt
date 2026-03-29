@@ -57,28 +57,7 @@ fun SettingsScreen(
         hasInitialized = true
     }
 
-    var showExitWarning by remember { mutableStateOf(false) }
-    val hasUnsavedChanges = apiKey != (currentApiKey ?: "") || 
-                            modelId != currentModelId || 
-                            animationsEnabled != animationsEnabledPref || 
-                            selectedTheme != currentTheme
-
-    val attemptBack = {
-        if (hasUnsavedChanges) {
-            showExitWarning = true
-        } else {
-            onBack()
-        }
-    }
-
-    androidx.activity.compose.PredictiveBackHandler(enabled = hasUnsavedChanges) { progress ->
-        try {
-            progress.collect { /* No-op */ }
-            showExitWarning = true
-        } catch (e: Exception) {
-            android.util.Log.e("Settings", "Predictive back failed", e)
-        }
-    }
+    val attemptBack = { onBack() }
 
     val storagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree()
@@ -102,68 +81,28 @@ fun SettingsScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Settings") },
-                navigationIcon = {
-                    IconButton(onClick = attemptBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
+    Scaffold { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // ─── Trash ──────────────────────────────────────
+                OutlinedButton(
+                    onClick = onTrashClick,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                     Icon(Icons.Default.Delete, contentDescription = null)
+                     Spacer(modifier = Modifier.width(8.dp))
+                     Text("Trash (${deletedNotes.size})")
                 }
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // ─── Secret Notes ────────────────────────────────
-            OutlinedButton(
-                onClick = onSecretNotesClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                 Icon(Icons.Default.Lock, contentDescription = null)
-                 Spacer(modifier = Modifier.width(8.dp))
-                 Text("Access Secret Notes")
-            }
 
-            // ─── Trash ──────────────────────────────────────
-            OutlinedButton(
-                onClick = onTrashClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                 Icon(Icons.Default.Delete, contentDescription = null)
-                 Spacer(modifier = Modifier.width(8.dp))
-                 Text("Trash (${deletedNotes.size})")
-            }
 
-            HorizontalDivider()
-
-            // ─── Import Notes ────────────────────────────────
-            Text("Import Notes", style = MaterialTheme.typography.titleMedium)
-            
-            OutlinedButton(
-                onClick = {
-                    importPicker.launch(arrayOf(
-                        "text/plain",
-                        "text/markdown",
-                        "application/json",
-                        "application/octet-stream"
-                    ))
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.FileOpen, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Import .txt / .md / .json Files")
-            }
-            
-            HorizontalDivider()
 
             // ─── Theme & Appearance ──────────────────────────
             Text("App Theme", style = MaterialTheme.typography.titleMedium)
@@ -217,7 +156,10 @@ fun SettingsScreen(
 
             OutlinedTextField(
                 value = apiKey,
-                onValueChange = { apiKey = it },
+                onValueChange = { newValue -> 
+                    apiKey = newValue 
+                    viewModel.saveSettings(newValue, modelId, selectedTheme, animationsEnabled)
+                },
                 label = { Text("OpenRouter API Key") },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("sk-or-v1-...") }
@@ -225,7 +167,10 @@ fun SettingsScreen(
 
             OutlinedTextField(
                 value = modelId,
-                onValueChange = { modelId = it },
+                onValueChange = { newValue -> 
+                    modelId = newValue 
+                    viewModel.saveSettings(apiKey, newValue, selectedTheme, animationsEnabled)
+                },
                 label = { Text("AI Model ID") },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("google/gemini-flash-1.5") }
@@ -265,39 +210,37 @@ fun SettingsScreen(
                 }
             }
 
-            HorizontalDivider()
-
-            Button(
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // ─── Import Notes ────────────────────────────────
+            Text("Import Notes", style = MaterialTheme.typography.titleMedium)
+            
+            OutlinedButton(
                 onClick = {
-                    viewModel.saveSettings(apiKey, modelId, selectedTheme, animationsEnabled)
-                    onBack()
+                    importPicker.launch(arrayOf(
+                        "text/plain",
+                        "text/markdown",
+                        "application/json",
+                        "application/octet-stream"
+                    ))
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save Settings")
+                Icon(Icons.Default.FileOpen, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Import .txt / .md / .json Files")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+            Spacer(modifier = Modifier.height(100.dp))
+            }
 
-        if (showExitWarning) {
-            AlertDialog(
-                onDismissRequest = { showExitWarning = false },
-                title = { Text("Unsaved Changes") },
-                text = { Text("You have unsaved changes in your settings. Save before leaving?") },
-                confirmButton = {
-                    TextButton(onClick = {
-                        viewModel.saveSettings(apiKey, modelId, selectedTheme, animationsEnabled)
-                        showExitWarning = false
-                        onBack()
-                    }) { Text("Save") }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        showExitWarning = false
-                        onBack()
-                    }) { Text("Discard") }
-                }
+            // DotPill overlay at bottom
+            com.folius.dotnotes.ui.components.DotPill(
+                modifier = Modifier.align(androidx.compose.ui.Alignment.BottomCenter),
+                placeholderText = "Settings",
+                onSwipeRight = attemptBack,
+                onSwipeLeft = attemptBack,
+                onSwipeUp = onSecretNotesClick
             )
         }
     }
@@ -321,12 +264,12 @@ fun ThemeSquircleCard(
         Box(
             modifier = Modifier
                 .size(72.dp)
-                .clip(RoundedCornerShape(22.dp))
+                .clip(MaterialTheme.shapes.large)
                 .background(backgroundColor)
                 .border(
                     width = if (isSelected) 3.dp else 1.dp,
                     color = if (isSelected) primaryColor else MaterialTheme.colorScheme.outlineVariant,
-                    shape = RoundedCornerShape(22.dp)
+                    shape = MaterialTheme.shapes.large
                 ),
             contentAlignment = androidx.compose.ui.Alignment.Center
         ) {
@@ -346,7 +289,7 @@ fun ThemeSquircleCard(
                 Box(
                     modifier = Modifier
                         .size(30.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(MaterialTheme.shapes.small)
                         .background(primaryColor)
                 )
             }

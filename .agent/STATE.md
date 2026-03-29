@@ -1,0 +1,3 @@
+- **Current Progress**: Overhauled Markdown to a recursive block-based architecture and stabilized Locked Notes state management.
+- **Active Constraints**: Block-based rendering is now the authoritative pattern; all Lazy list items MUST have unique keys for UI stability.
+- **Immediate Next Step**: Request user verification of the "Unlock" flow in `SecretNotesScreen` to ensure zero flicker.

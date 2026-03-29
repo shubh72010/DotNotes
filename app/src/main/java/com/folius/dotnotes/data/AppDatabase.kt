@@ -5,11 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Note::class, Folder::class], version = 8, exportSchema = false)
+@Database(entities = [Note::class], version = 10, exportSchema = false)
 @androidx.room.TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao
-    abstract fun folderDao(): FolderDao
 
     companion object {
         @Volatile

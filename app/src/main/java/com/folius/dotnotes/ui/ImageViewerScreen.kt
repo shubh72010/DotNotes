@@ -18,10 +18,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.draw.clipToBounds
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -72,24 +78,53 @@ fun ImageViewerScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Black.copy(alpha = 0.5f),
+                    containerColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f),
                     navigationIconContentColor = Color.White,
                     actionIconContentColor = Color.White
                 )
             )
         },
-        containerColor = Color.Black
+        containerColor = MaterialTheme.colorScheme.scrim
     ) { padding ->
+        var scale by remember { mutableStateOf(1f) }
+        var rotation by remember { mutableStateOf(0f) }
+        var offset by remember { mutableStateOf(Offset.Zero) }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .clipToBounds()
+                .pointerInput(Unit) {
+                    detectTransformGestures { _, pan, zoom, rotate ->
+                        scale *= zoom
+                        rotation += rotate
+                        offset += pan
+                    }
+                }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onDoubleTap = {
+                            scale = 1f
+                            rotation = 0f
+                            offset = Offset.Zero
+                        }
+                    )
+                },
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
                 model = imageUri,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        scaleX = maxOf(1f, scale)
+                        scaleY = maxOf(1f, scale)
+                        rotationZ = rotation
+                        translationX = offset.x * scale
+                        translationY = offset.y * scale
+                    },
                 contentScale = ContentScale.Fit
             )
         }

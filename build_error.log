@@ -1,0 +1,142 @@
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+
+> Task :app:compileDebugKotlin
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/NoteEditorScreen.kt:493:35 Argument type mismatch: actual type is 'kotlin.Function0<kotlin.Any>', but 'kotlin.Function0<kotlin.Unit>' was expected.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/NoteEditorScreen.kt:940:13 Unresolved reference 'showExitWarning'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/NoteEditorScreen.kt:942:38 Unresolved reference 'showExitWarning'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/NoteEditorScreen.kt:963:29 Unresolved reference 'showExitWarning'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/NoteEditorScreen.kt:970:25 Unresolved reference 'showExitWarning'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/NoteEditorScreen.kt:1420:37 'val' cannot be reassigned.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/NoteListScreen.kt:347:41 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:8:2 Unresolved reference 'Composable'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:10:18 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:11:21 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:12:15 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:12:26 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:14:24 Unresolved reference 'MaterialTheme'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:16:5 Unresolved reference 'Surface'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:18:14 Unresolved reference 'padding'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:18:24 Unresolved reference 'dp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:19:24 Unresolved reference 'dp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:20:24 Unresolved reference 'dp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:21:17 Unresolved reference 'CircleShape'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:22:17 Unresolved reference 'Color'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:23:7 Unresolved reference 'Box'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:24:9 Unresolved reference 'Box'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:25:24 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:28:31 Unresolved reference 'dp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:29:29 Unresolved reference 'Brush'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:30:34 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:31:29 Unresolved reference 'Color'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:31:29 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:32:29 Unresolved reference 'Color'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:35:29 Unresolved reference 'CircleShape'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:38:29 Unresolved reference 'Color'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:39:29 Unresolved reference 'CircleShape'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:41:11 Unresolved reference 'BoxWithConstraints'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:42:13 Unresolved reference 'BoxWithConstraints'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:42:43 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:42:76 Unresolved reference 'dp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:42:81 Unresolved reference 'Row'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:43:32 Unresolved reference 'maxWidth'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:44:31 @Composable invocations can only happen from the context of a @Composable function
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:44:31 Type 'androidx.compose.runtime.State<androidx.compose.ui.unit.Dp>' has no method 'getValue(Nothing?, KProperty0<*>)', so it cannot serve as a delegate.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:46:25 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:46:44 Unresolved reference 'dp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:47:25 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:48:25 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:48:50 None of the following candidates is applicable:
+fun BigDecimal.times(other: BigDecimal): BigDecimal
+fun BigInteger.times(other: BigInteger): BigInteger
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:49:35 Unresolved reference 'dp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:56:17 Unresolved reference 'Box'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:57:32 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:61:31 Unresolved reference 'CircleShape'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:65:17 Unresolved reference 'Row'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:66:32 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:67:41 Unresolved reference 'Alignment'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:70:51 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:71:32 Unresolved reference 'Icons'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:73:51 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:74:36 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:77:51 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:78:32 Unresolved reference 'Icons'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:80:51 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:81:36 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:84:51 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:85:78 Unresolved reference 'Map'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:87:51 Unresolved reference 'NoteTab'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:88:36 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:96:2 Unresolved reference 'Composable'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:97:13 Functions which invoke @Composable functions must be marked with the @Composable annotation
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:99:11 Unresolved reference 'ImageVector'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:102:15 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:102:26 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:104:28 @Composable invocations can only happen from the context of a @Composable function
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:104:28 Type 'androidx.compose.runtime.State<androidx.compose.ui.graphics.Color>' has no method 'getValue(Nothing?, KProperty0<*>)', so it cannot serve as a delegate.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:105:37 Unresolved reference 'MaterialTheme'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:105:95 Unresolved reference 'Color'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:109:25 @Composable invocations can only happen from the context of a @Composable function
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:109:25 Type 'androidx.compose.runtime.State<androidx.compose.ui.graphics.Color>' has no method 'getValue(Nothing?, KProperty0<*>)', so it cannot serve as a delegate.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:110:37 Unresolved reference 'MaterialTheme'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:110:76 Unresolved reference 'MaterialTheme'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:115:5 Unresolved reference 'Box'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:117:14 Unresolved reference 'fillMaxHeight'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:118:19 Unresolved reference 'CircleShape'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:120:28 Unresolved reference 'Alignment'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:121:7 Unresolved reference 'Row'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:122:9 Unresolved reference 'Row'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:123:33 Unresolved reference 'Alignment'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:124:37 Unresolved reference 'Arrangement'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:125:24 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:125:56 Unresolved reference 'dp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:126:11 Unresolved reference 'Text'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:127:13 Unresolved reference 'Icon'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:131:28 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:131:45 Unresolved reference 'dp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:133:13 Unresolved reference 'Spacer'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:133:31 Unresolved reference 'Modifier'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:133:48 Unresolved reference 'dp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:134:13 Unresolved reference 'Text'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:136:25 Unresolved reference 'MaterialTheme'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:137:48 Unresolved reference 'FontWeight'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:137:69 Unresolved reference 'FontWeight'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:138:35 Unresolved reference 'sp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:139:37 Unresolved reference 'sp'.
+e: file:///C:/Users/Shubh/AndroidStudioProjects/DotNotes/app/src/main/java/com/folius/dotnotes/ui/components/TabSwitcherPill.kt:144:28 Unresolved reference 'TextOverflow'.
+
+> Task :app:compileDebugKotlin FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 12s
+17 actionable tasks: 1 executed, 16 up-to-date

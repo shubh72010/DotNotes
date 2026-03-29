@@ -26,6 +26,16 @@ fun BlurText(
     delay: Long = 200,
     animateByWords: Boolean = true
 ) {
+    // Bypass for long text to prevent performance issues (ANRs)
+    if (text.length > 1000) {
+        Text(
+            text = text,
+            style = style,
+            modifier = modifier
+        )
+        return
+    }
+
     // Split into words but preserve whitespace/newlines
     // This regex splits by spaces but keeps the delimiter (the space)
     val elements = if (animateByWords) {

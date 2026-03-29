@@ -6,19 +6,18 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.folius.dotnotes.data.AppDatabase
 import com.folius.dotnotes.data.Note
+import com.folius.dotnotes.data.NoteRepository
 import com.folius.dotnotes.data.SettingsManager
 import com.folius.dotnotes.network.ChatRequest
 import com.folius.dotnotes.network.Message
-import com.folius.dotnotes.network.OpenRouterApi
+import com.folius.dotnotes.network.NetworkModule
 import com.folius.dotnotes.utils.BackupUtils
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 enum class NoteTab {
-    NOTES, CHECKLISTS, SEARCH
+    NOTES, CHECKLISTS, MAPS, SEARCH
 }
 
 enum class SortOrder(val label: String) {
@@ -31,15 +30,20 @@ enum class SortOrder(val label: String) {
 
 class NoteViewModel(application: Application) : AndroidViewModel(application) {
     private val db = AppDatabase.getDatabase(application)
-    private val noteDao = db.noteDao()
-    private val folderDao = db.folderDao()
+    private val repository = NoteRepository(db.noteDao())
     private val settingsManager = SettingsManager(application)
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
-    private val _selectedFolderId = MutableStateFlow<Int?>(null)
-    val selectedFolderId: StateFlow<Int?> = _selectedFolderId
+    // Debounced search query for performance
+    private val debouncedSearchQuery = _searchQuery
+        .debounce(300L)
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+
+    private val _selectedMapId = MutableStateFlow<Int?>(null)
+    val selectedMapId: StateFlow<Int?> = _selectedMapId
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -61,34 +65,23 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     val theme = settingsManager.themePref.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Dark")
     val isAnimationsEnabled = settingsManager.isAnimationsEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
     val storageUri = settingsManager.storageUri.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    val hasShownGestureHints = settingsManager.hasShownGestureHints.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
     
-    val folders: StateFlow<List<com.folius.dotnotes.data.Folder>> = folderDao.getAllFolders()
+    val mapNotes: StateFlow<List<Note>> = repository.getAllNotes()
+        .map { notes -> notes.filter { it.isMap && !it.isDeleted } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    companion object {
-        private const val BASE_URL = "https://openrouter.ai/api/v1/"
-        
-        private val retrofit by lazy {
-            Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-        }
-
-        private val api by lazy { retrofit.create(OpenRouterApi::class.java) }
-    }
 
     // ─── Main notes flow (Refactored to typed nested combine) ──────
 
-    val allNonDeletedNotes: StateFlow<List<Note>> = noteDao.getAllNotes()
+    val allNonDeletedNotes: StateFlow<List<Note>> = repository.getAllNotes()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val filterCombiner = combine(
-        _searchQuery,
-        _selectedFolderId,
+        debouncedSearchQuery,
+        _selectedMapId,
         _selectedTab
-    ) { query, folderId, tab ->
-        Triple(query, folderId, tab)
+    ) { query, mapId, tab ->
+        Triple(query, mapId, tab)
     }
 
     private val sortCombiner = combine(
@@ -103,7 +96,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         filterCombiner,
         sortCombiner
     ) { notes, filters, sorting ->
-        val (query, folderId, tab) = filters
+        val (query, mapId, tab) = filters
         val (sort, tag) = sorting
 
         var filteredNotes = notes
@@ -111,8 +104,9 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         // Filter by Tab
         filteredNotes = filteredNotes.filter { note ->
             when (tab) {
-                NoteTab.NOTES -> !note.isChecklist && !note.isPinned
-                NoteTab.CHECKLISTS -> note.isChecklist && !note.isPinned
+                NoteTab.NOTES -> !note.isChecklist && !note.isMap && !note.isPinned
+                NoteTab.CHECKLISTS -> note.isChecklist && !note.isMap && !note.isPinned
+                NoteTab.MAPS -> note.isMap && !note.isPinned
                 NoteTab.SEARCH -> true
             }
         }
@@ -126,9 +120,14 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // Filter by folder
-        if (folderId != null) {
-            filteredNotes = filteredNotes.filter { note -> note.folderId == folderId }
+        // Filter by mapId (Replacement for Folders)
+        if (mapId != null) {
+            val selectedMapNote = notes.find { it.id == mapId }
+            if (selectedMapNote != null) {
+                filteredNotes = filteredNotes.filter { note -> 
+                    note.id in selectedMapNote.linkedNoteIds || note.id == mapId
+                }
+            }
         }
 
         // Filter by tag
@@ -154,7 +153,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
 
     val secretNotes: StateFlow<List<Note>> = combine(
         allNonDeletedNotes,
-        _searchQuery
+        debouncedSearchQuery
     ) { notes, query ->
         var filteredNotes = notes.filter { it.isSecret }
         if (query.isNotBlank()) {
@@ -167,10 +166,10 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     }.flowOn(kotlinx.coroutines.Dispatchers.Default)
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val pinnedNotes: StateFlow<List<Note>> = noteDao.getPinnedNotes()
+    val pinnedNotes: StateFlow<List<Note>> = repository.getPinnedNotes()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val deletedNotes: StateFlow<List<Note>> = noteDao.getDeletedNotes()
+    val deletedNotes: StateFlow<List<Note>> = repository.getDeletedNotes()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // All unique tags across all notes
@@ -183,7 +182,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     init {
         viewModelScope.launch {
             val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
-            noteDao.permanentlyDeleteOldTrash(thirtyDaysAgo)
+            repository.permanentlyDeleteOldTrash(thirtyDaysAgo)
         }
     }
 
@@ -191,8 +190,8 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         _isLoading.value = false
     }
 
-    fun setSelectedFolder(id: Int?) {
-        _selectedFolderId.value = id
+    fun setSelectedMap(id: Int?) {
+        _selectedMapId.value = id
     }
 
     fun setSortOrder(order: SortOrder) {
@@ -207,26 +206,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         _isSecretAuthenticated.value = authenticated
     }
 
-    fun addFolder(name: String) {
-        viewModelScope.launch {
-            folderDao.insertFolder(com.folius.dotnotes.data.Folder(name = name))
-        }
-    }
-
-    fun renameFolder(folder: com.folius.dotnotes.data.Folder, newName: String) {
-        viewModelScope.launch {
-            folderDao.updateFolder(folder.copy(name = newName))
-        }
-    }
-
-    fun deleteFolder(folder: com.folius.dotnotes.data.Folder) {
-        viewModelScope.launch {
-            folderDao.deleteFolder(folder)
-            if (_selectedFolderId.value == folder.id) {
-                _selectedFolderId.value = null
-            }
-        }
-    }
+    // Folders removed, Map replacement logic in place.
 
     fun saveSettings(key: String, model: String, theme: String, animationsEnabled: Boolean) {
         viewModelScope.launch { settingsManager.saveSettings(key, model, theme, animationsEnabled) }
@@ -234,6 +214,10 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setStorageUri(uri: String?) {
         viewModelScope.launch { settingsManager.saveStorageUri(uri) }
+    }
+
+    fun setHasShownGestureHints(shown: Boolean) {
+        viewModelScope.launch { settingsManager.saveHasShownGestureHints(shown) }
     }
 
     fun backupNotes(onSuccess: () -> Unit, onError: (String) -> Unit) {
@@ -246,11 +230,10 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
                 return@launch
             }
 
-            val allNotes = noteDao.getAllNotes().first()
-            val allFolders = folderDao.getAllFolders().first()
+            val allNotes = repository.getAllNotesSnapshot()
 
             val success = BackupUtils.exportNotesToDirectory(
-                getApplication(), uri, allNotes, allFolders
+                getApplication(), uri, allNotes
             )
 
             withContext(kotlinx.coroutines.Dispatchers.Main) {
@@ -259,9 +242,8 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun summarizeNote(content: String, onResult: (String?) -> Unit) {
+    fun processAiAction(action: String, content: String, onResult: (String?) -> Unit) {
         viewModelScope.launch {
-            // Read settings within coroutine to handle initialization delays
             val key = apiKey.value
             if (key == null) {
                 withContext(kotlinx.coroutines.Dispatchers.Main) {
@@ -271,13 +253,23 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
             }
             val model = modelId.value
             
+            val systemPrompt = when(action) {
+                "Grammar & Clarity" -> "Fix grammar and improve the clarity of the following text."
+                "Formal Tone" -> "Rewrite the following text in a more formal tone."
+                "Casual Tone" -> "Rewrite the following text in a more casual tone."
+                "Bullets to Prose" -> "Expand the following bullet points into full prose paragraphs."
+                "Prose to Bullets" -> "Summarize the following text into a concise bulleted list."
+                "Q&A" -> "Answer the user's question based strictly on the provided context."
+                else -> "Summarize the following note content concisely."
+            }
+
             try {
-                val response = api.getCompletion(
+                val response = NetworkModule.api.getCompletion(
                     apiKey = "Bearer $key",
                     request = ChatRequest(
                         model = model,
                         messages = listOf(
-                            Message("system", "Summarize the following note content concisely."),
+                            Message("system", systemPrompt),
                             Message("user", content)
                         )
                     )
@@ -316,31 +308,30 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         images: List<String> = emptyList(),
         isChecklist: Boolean = false,
         checklist: List<com.folius.dotnotes.data.ChecklistItem> = emptyList(),
-        folderId: Int? = _selectedFolderId.value,
         isSecret: Boolean? = null,
         isPinned: Boolean? = null,
         linkedNoteIds: List<Int>? = null,
         tags: List<String>? = null,
         color: Int? = null,
+        clearColor: Boolean = false,
         isMap: Boolean? = null,
         mapItems: List<com.folius.dotnotes.data.MapItem>? = null
     ): Int {
         val now = System.currentTimeMillis()
         val note = if (id != null && id != -1) {
-            val existing = noteDao.getNoteById(id) ?: return -1
+            val existing = repository.getNoteById(id) ?: return -1
             existing.copy(
                 title = title,
                 content = content,
                 images = images,
                 isChecklist = isChecklist,
                 checklist = checklist,
-                folderId = folderId,
                 isSecret = isSecret ?: existing.isSecret,
                 isPinned = isPinned ?: existing.isPinned,
                 lastModified = now,
                 linkedNoteIds = linkedNoteIds ?: existing.linkedNoteIds,
                 tags = tags ?: existing.tags,
-                color = color ?: existing.color, // Passing null means "keep existing"
+                color = if (clearColor) null else (color ?: existing.color),
                 isMap = isMap ?: existing.isMap,
                 mapItems = mapItems ?: existing.mapItems
             )
@@ -351,7 +342,6 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
                 images = images,
                 isChecklist = isChecklist,
                 checklist = checklist,
-                folderId = folderId,
                 isSecret = isSecret ?: false,
                 isPinned = isPinned ?: false,
                 timestamp = now,
@@ -363,7 +353,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
                 mapItems = mapItems ?: emptyList()
             )
         }
-        val insertedId = noteDao.insertNote(note)
+        val insertedId = repository.insertNote(note)
         return if (id != null && id != -1) id else insertedId.toInt()
     }
 
@@ -377,7 +367,6 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         images: List<String> = emptyList(),
         isChecklist: Boolean = false,
         checklist: List<com.folius.dotnotes.data.ChecklistItem> = emptyList(),
-        folderId: Int? = _selectedFolderId.value,
         isSecret: Boolean = false,
         isPinned: Boolean = false,
         isMap: Boolean = false,
@@ -391,7 +380,6 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
                 images = images,
                 isChecklist = isChecklist,
                 checklist = checklist,
-                folderId = folderId,
                 isSecret = isSecret,
                 isPinned = isPinned,
                 isMap = isMap,
@@ -400,34 +388,42 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun createMapNote(title: String, folderId: Int? = _selectedFolderId.value) {
+    fun createMapNote(title: String) {
         addNote(
             title = title,
             content = "",
-            isMap = true,
-            folderId = folderId
+            isMap = true
         )
     }
 
     fun updateMapItems(noteId: Int, items: List<com.folius.dotnotes.data.MapItem>) {
         viewModelScope.launch {
-            val note = noteDao.getNoteById(noteId)
+            val note = repository.getNoteById(noteId)
             if (note != null) {
-                noteDao.insertNote(note.copy(mapItems = items, lastModified = System.currentTimeMillis()))
+                repository.insertNote(note.copy(mapItems = items, lastModified = System.currentTimeMillis()))
+            }
+        }
+    }
+
+    fun updateNoteTitle(id: Int, newTitle: String) {
+        viewModelScope.launch {
+            val note = repository.getNoteById(id)
+            if (note != null) {
+                repository.insertNote(note.copy(title = newTitle, lastModified = System.currentTimeMillis()))
             }
         }
     }
 
     fun toggleNotePinnedStatus(note: Note) {
         viewModelScope.launch {
-            noteDao.insertNote(note.copy(isPinned = !note.isPinned))
+            repository.insertNote(note.copy(isPinned = !note.isPinned))
         }
     }
 
 
     fun toggleNoteSecretStatus(note: Note) {
         viewModelScope.launch {
-            noteDao.insertNote(note.copy(isSecret = !note.isSecret))
+            repository.insertNote(note.copy(isSecret = !note.isSecret))
         }
     }
 
@@ -438,7 +434,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun trashNote(note: Note) {
         viewModelScope.launch {
-            noteDao.softDeleteNote(note.id, System.currentTimeMillis())
+            repository.softDeleteNote(note.id, System.currentTimeMillis())
         }
     }
 
@@ -447,25 +443,25 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun trashNoteById(id: Int) {
         viewModelScope.launch {
-            noteDao.softDeleteNote(id, System.currentTimeMillis())
+            repository.softDeleteNote(id, System.currentTimeMillis())
         }
     }
 
     fun restoreNote(note: Note) {
         viewModelScope.launch {
-            noteDao.restoreNote(note.id)
+            repository.restoreNote(note.id)
         }
     }
 
     fun permanentlyDeleteNote(note: Note) {
         viewModelScope.launch {
-            noteDao.deleteNote(note)
+            repository.deleteNote(note)
         }
     }
 
     fun emptyTrash() {
         viewModelScope.launch {
-            noteDao.emptyTrash()
+            repository.emptyTrash()
         }
     }
 
@@ -474,7 +470,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     fun duplicateNote(note: Note) {
         viewModelScope.launch {
             val now = System.currentTimeMillis()
-            noteDao.insertNote(
+            repository.insertNote(
                 note.copy(
                     id = 0,
                     title = "${note.title} (Copy)",
@@ -491,7 +487,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val notes = BackupUtils.importNotesFromUris(getApplication(), uris)
             if (notes.isNotEmpty()) {
-                noteDao.insertNotes(notes)
+                repository.insertNotes(notes)
             }
             withContext(kotlinx.coroutines.Dispatchers.Main) {
                 onResult(notes.size)
@@ -502,22 +498,22 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     // ─── Notes Connect (Linking) ────────────────────────────────
 
     suspend fun getNoteById(id: Int): Note? {
-        return noteDao.getNoteById(id)
+        return repository.getNoteById(id)
     }
 
     suspend fun getNoteByTitle(title: String): Note? {
-        return noteDao.getNoteByTitle(title)
+        return repository.getNoteByTitle(title)
     }
 
     suspend fun getLinkedNotes(noteId: Int): List<Note> {
-        val note = noteDao.getNoteById(noteId) ?: return emptyList()
+        val note = repository.getNoteById(noteId) ?: return emptyList()
         if (note.linkedNoteIds.isEmpty()) return emptyList()
-        return noteDao.getNotesByIds(note.linkedNoteIds)
+        return repository.getNotesByIds(note.linkedNoteIds)
     }
 
     suspend fun getBacklinks(noteId: Int): List<Note> {
         // Query database directly to ensure fresh snapshot
-        return noteDao.getAllNotes().first()
+        return repository.getAllNotesSnapshot()
             .filter { noteId in it.linkedNoteIds && it.id != noteId }
     }
 }

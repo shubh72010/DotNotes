@@ -12,14 +12,13 @@ data class Note(
     val id: Int = 0,
     val title: String,
     val content: String,
+    @ColumnInfo(index = true)
     val timestamp: Long = System.currentTimeMillis(),
-    @ColumnInfo(defaultValue = "0")
+    @ColumnInfo(index = true, defaultValue = "0")
     val lastModified: Long = System.currentTimeMillis(),
     val images: List<String> = emptyList(),
     val isChecklist: Boolean = false,
     val checklist: List<ChecklistItem> = emptyList(),
-    @ColumnInfo(index = true)
-    val folderId: Int? = null,
     @ColumnInfo(index = true)
     val isSecret: Boolean = false,
     @ColumnInfo(index = true)

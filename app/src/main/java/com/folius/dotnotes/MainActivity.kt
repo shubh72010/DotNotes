@@ -13,7 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -24,10 +24,10 @@ import com.folius.dotnotes.ui.NoteEditorScreen
 import com.folius.dotnotes.ui.NoteListScreen
 import com.folius.dotnotes.ui.NoteViewModel
 import com.folius.dotnotes.ui.theme.DotNotesTheme
+import com.folius.dotnotes.ui.NoteMapScreen
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,34 +51,35 @@ class MainActivity : FragmentActivity() {
                     enterTransition = {
                         slideIntoContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                            animationSpec = tween(300)
+                            animationSpec = spring(dampingRatio = 0.9f, stiffness = Spring.StiffnessMediumLow)
                         )
                     },
                     exitTransition = {
                         slideOutOfContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                            animationSpec = tween(300)
+                            animationSpec = spring(dampingRatio = 0.9f, stiffness = Spring.StiffnessMediumLow)
                         )
                     },
                     popEnterTransition = {
                         slideIntoContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                            animationSpec = tween(300)
+                            animationSpec = spring(dampingRatio = 0.9f, stiffness = Spring.StiffnessMediumLow)
                         )
                     },
                     popExitTransition = {
                         slideOutOfContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                            animationSpec = tween(300)
+                            animationSpec = spring(dampingRatio = 0.9f, stiffness = Spring.StiffnessMediumLow)
                         )
                     }
                 ) {
                     composable("list") {
                         NoteListScreen(
                             viewModel = viewModel,
-                            onNoteClick = { id -> navController.navigate("editor/$id") },
-                            onAddNoteClick = { navController.navigate("editor/-1") },
-                            onSettingsClick = { navController.navigate("settings") }
+                            onNoteClick = { id -> navController.navigate("editor/$id") { launchSingleTop = true } },
+                            onMapNoteClick = { id -> navController.navigate("map/$id") { launchSingleTop = true } },
+                            onAddNoteClick = { tab -> navController.navigate("editor/-1?initialTab=${tab.name}") { launchSingleTop = true } },
+                            onSettingsClick = { navController.navigate("settings") { launchSingleTop = true } }
                         )
                     }
                     composable("settings") {
@@ -103,20 +104,25 @@ class MainActivity : FragmentActivity() {
                         )
                     }
                     composable(
-                        route = "editor/{noteId}",
-                        arguments = listOf(navArgument("noteId") { type = NavType.IntType })
+                        route = "editor/{noteId}?initialTab={initialTab}",
+                        arguments = listOf(
+                            navArgument("noteId") { type = NavType.IntType },
+                            navArgument("initialTab") { type = NavType.StringType; defaultValue = "NOTES" }
+                        )
                     ) { backStackEntry ->
                         val noteId = backStackEntry.arguments?.getInt("noteId")
+                        val initialTab = backStackEntry.arguments?.getString("initialTab") ?: "NOTES"
                         NoteEditorScreen(
                             viewModel = viewModel,
                             noteId = noteId,
+                            initialTab = initialTab,
                             onBack = { navController.popBackStack() },
                             onImageClick = { uri -> 
                                 val encodedUri = java.net.URLEncoder.encode(uri, "UTF-8")
                                 navController.navigate("image_viewer/$encodedUri") 
                             },
                             onNavigateToNote = { linkedNoteId ->
-                                navController.navigate("editor/$linkedNoteId")
+                                navController.navigate("editor/$linkedNoteId") { launchSingleTop = true }
                             }
                         )
                     }
@@ -132,24 +138,29 @@ class MainActivity : FragmentActivity() {
                             )
                         }
                     }
+                    composable(
+                        route = "map/{noteId}",
+                        arguments = listOf(navArgument("noteId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val noteId = backStackEntry.arguments?.getInt("noteId") ?: -1
+                        val allNotes by viewModel.allNonDeletedNotes.collectAsState(initial = emptyList())
+                        val note = allNotes.find { it.id == noteId }
+                        
+                        NoteMapScreen(
+                            noteId = noteId,
+                            viewModel = viewModel,
+                            mapItems = note?.mapItems ?: emptyList(),
+                            onMapItemsChange = { items -> 
+                                viewModel.updateMapItems(noteId, items)
+                            },
+                            onNavigateToNote = { linkedNoteId ->
+                                navController.navigate("editor/$linkedNoteId")
+                            },
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
                 }
             }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    DotNotesTheme {
-        Greeting("Android")
-    }
-}
+}

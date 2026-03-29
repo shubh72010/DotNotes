@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import com.folius.dotnotes.data.ChecklistItem
 import com.folius.dotnotes.data.Note
-import com.folius.dotnotes.data.Folder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.BufferedReader
@@ -21,8 +20,7 @@ object BackupUtils {
     fun exportNotesToDirectory(
         context: Context,
         uriString: String,
-        notes: List<Note>,
-        folders: List<Folder>
+        notes: List<Note>
     ): Boolean {
         return try {
             val rootUri = Uri.parse(uriString)
@@ -34,26 +32,16 @@ object BackupUtils {
             val backupDirName = "DotNotes_Backup_$timestamp"
             val backupDir = rootDoc.createDirectory(backupDirName) ?: return false
 
-            val folderMap = folders.associateBy { it.id }
-            val notesByFolder = notes.groupBy { it.folderId }
-
-            // Export Notes without folder
-            notesByFolder[null]?.forEach { note ->
+            // Export all notes to the root of the backup directory
+            notes.forEach { note ->
                 saveNoteToFile(context, backupDir, note)
             }
 
-            // Export Folders and their notes
-            folders.forEach { folder ->
-                val folderDir = backupDir.createDirectory(folder.name.replace("/", "_")) ?: return@forEach
-                notesByFolder[folder.id]?.forEach { note ->
-                    saveNoteToFile(context, folderDir, note)
-                }
-            }
-
             // Also export a JSON manifest for full restore
-            val jsonFile = backupDir.createFile("application/json", "backup_manifest.json")
+            val jsonFileName = "backup_manifest.json"
+            val jsonFile = backupDir.createFile("application/json", jsonFileName)
             jsonFile?.let { file ->
-                val manifest = BackupManifest(notes = notes, folders = folders)
+                val manifest = BackupManifest(notes = notes)
                 context.contentResolver.openOutputStream(file.uri)?.use { outputStream ->
                     outputStream.write(gson.toJson(manifest).toByteArray())
                 }
@@ -181,7 +169,6 @@ object BackupUtils {
     }
 
     data class BackupManifest(
-        val notes: List<Note>,
-        val folders: List<Folder>
+        val notes: List<Note>
     )
 }
