@@ -1,20 +1,21 @@
 # honest message from the developer: Alrighty, I'm now focusing on DotNotes yayay
 
-
 # DotNotes 📝
 
 DotNotes is a modern, privacy-focused, and feature-rich note-taking application for Android. Built with Jetpack Compose and modern Android architecture, it provides a seamless experience for capturing your thoughts, managing tasks, and keeping your sensitive information secure.
 
 ## ✨ Features
 
-- **📂 Folder Organization**: Keep your notes tidy by grouping them into custom folders with rename/remove support.
+- **🗺️ Visual Note Maps**: Organize your thoughts spatially by linking notes together in infinite map views. Maps act as dynamic, linked folders for a modern approach to organization.
+- **🤖 Built-in AI Assistant**: Utilize advanced AI (Gemini/OpenRouter) to fix grammar, adjust tone, summarize content, or answer questions directly within your notes.
+- **✍️ Powerful Markdown Engine**: Our custom block-based markdown renderer natively supports recursive styles (bold, italic, strikethrough), code blocks, complex tables, quotes, and interactive checklists.
 - **🔒 Secret Notes**: Protect your most sensitive information with biometrically secured private notes.
 - **✅ Dynamic Checklists**: Easily create and reorder checklist items with smooth drag-and-drop support.
-- **🖼️ Image Integration**: Attach images to your notes for better visual context.
-- **📌 Note Pinning & Sharing**: Keep important notes at the top and easily share content.
-- **🎨 Customization**: Support for Dark, Light, and System themes, plus animation controls.
-- **🔍 Fast Search**: Find exactly what you're looking for with an efficient real-time search system.
-- **🔐 Privacy First**: All your data is stored locally on your device with custom storage path support.
+- **🖼️ Image Integration**: Attach local images and even snap photos with your camera in-app for better visual context.
+- **📌 Note Pinning & Backlinks**: Keep important notes at the top and seamlessly track related content through bidirectional wiki-links (`[[Note Name]]`).
+- **🎨 Customization**: Support for Dark, Light, and System themes, along with full UI animation controls.
+- **🔍 Fast Search & Tagging**: Find exactly what you're looking for via real-time search queries and `#tag` filtering.
+- **🔐 Privacy First**: All your data is stored locally on your device with intuitive folder-based backup/restore support.
 
 ## 🚀 Getting Started
 
@@ -40,10 +41,10 @@ DotNotes is a modern, privacy-focused, and feature-rich note-taking application 
 
 - **UI**: Jetpack Compose
 - **Database**: Room Persistence Library
-- **Navigation**: Compose Navigation
-- **Architecture**: MVVM (Model-View-ViewModel)
+- **Architecture**: MVVM (Model-View-ViewModel) utilizing Kotlin Coroutines & Flows
+- **Network**: Retrofit (for AI Integrations)
 - **Dependency Management**: Version Catalogs (libs.versions.toml)
-- **Encryption/Security**: Android Biometric Prompt
+- **Security**: Android Biometric Prompt
 
 ## 📄 License
 
