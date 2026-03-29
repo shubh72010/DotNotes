@@ -57,6 +57,7 @@ import java.util.*
 import com.folius.dotnotes.ui.components.BlurText
 import com.folius.dotnotes.ui.components.PinnedSubpill
 import com.folius.dotnotes.ui.components.DotPill
+import com.folius.dotnotes.ui.components.PinnedNotesBar
 import com.folius.dotnotes.ui.components.TabSwitcherPill
 import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
@@ -556,6 +557,7 @@ fun NoteListContent(
     modifier: Modifier = Modifier,
     showHint: Boolean = false,
     onDismissHint: () -> Unit = {}
+) {
     val haptic = LocalHapticFeedback.current
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
